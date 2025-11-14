@@ -1,9 +1,13 @@
 package org.example.avitotech.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.util.*;
 
 @Component
@@ -15,9 +19,21 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long jwtExpirationInMs;
 
+    private SecretKey key;
+
+    @PostConstruct
+    public void init() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+    }
+
     public boolean validateToken(String token) {
+        System.out.println("-------------------");
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (SecurityException e) {
             System.err.println("Invalid JWT signature: {}" + e);
@@ -35,7 +51,7 @@ public class JwtTokenProvider {
 
     public String getRoleFromToken(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(key)
                 .parseClaimsJws(token)
                 .getBody();
 
@@ -44,7 +60,7 @@ public class JwtTokenProvider {
 
     public String getUserIdFromToken(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(key)
                 .parseClaimsJws(token)
                 .getBody();
 
@@ -71,7 +87,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 }
