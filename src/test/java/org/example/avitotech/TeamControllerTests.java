@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-class TeamControllerTest {
+class TeamControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -72,7 +72,6 @@ class TeamControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddTeamSuccess() throws Exception {
-        // Arrange
         TeamRequest.TeamMemberRequest member1 = TeamRequest.TeamMemberRequest.builder()
                 .userId("u1")
                 .username("Alice")
@@ -93,7 +92,6 @@ class TeamControllerTest {
         when(teamService.createTeam(any(Team.class))).thenReturn(testTeam);
         when(teamService.getTeamByName("backend")).thenReturn(testTeam);
 
-        // Act & Assert
         mockMvc.perform(post("/team/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -110,7 +108,6 @@ class TeamControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void testAddTeamForbidden() throws Exception {
-        // Arrange
         testTeam = Team.builder()
                 .teamName("backend")
                 .members(testMembers)
@@ -120,7 +117,6 @@ class TeamControllerTest {
                 .members(List.of())
                 .build();
 
-        // Act & Assert
         mockMvc.perform(post("/team/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -128,9 +124,6 @@ class TeamControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    /**
-     * Тест: ошибка TEAM_EXISTS при попытке создать уже существующую команду
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddTeamAlreadyExists() throws Exception {
@@ -165,20 +158,14 @@ class TeamControllerTest {
         verify(teamService, times(1)).createTeam(any(Team.class));
     }
 
-
-    /**
-     * Тест: валидация - пустой список членов
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddTeamEmptyMembers() throws Exception {
-        // Arrange
         TeamRequest request = TeamRequest.builder()
                 .teamName("testtest")
                 .members(new ArrayList<>())
                 .build();
 
-        // Act & Assert
         mockMvc.perform(post("/team/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -186,13 +173,9 @@ class TeamControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    /**
-     * Тест: валидация - пустое имя команды
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testAddTeamEmptyTeamName() throws Exception {
-        // Arrange
         TeamRequest request = TeamRequest.builder()
                 .teamName("")
                 .members(List.of(
@@ -204,7 +187,6 @@ class TeamControllerTest {
                 ))
                 .build();
 
-        // Act & Assert
         mockMvc.perform(post("/team/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -212,18 +194,13 @@ class TeamControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    /**
-     * Тест: отсутствие авторизации
-     */
     @Test
     void testAddTeamUnauthorized() throws Exception {
-        // Arrange
         TeamRequest request = TeamRequest.builder()
                 .teamName("backend")
                 .members(List.of())
                 .build();
 
-        // Act & Assert (без @WithMockUser - нет токена)
         mockMvc.perform(post("/team/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
@@ -231,18 +208,11 @@ class TeamControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // ===== Тесты для GET /team/get =====
-
-    /**
-     * Тест: успешное получение команды с ADMIN ролью
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetTeamSuccess() throws Exception {
-        // Arrange
         when(teamService.getTeamByName("backend")).thenReturn(testTeam);
 
-        // Act & Assert
         mockMvc.perform(get("/team/get")
                         .param("team_name", "backend")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -253,16 +223,11 @@ class TeamControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.members[0].is_active").value(true));
     }
 
-    /**
-     * Тест: успешное получение команды с USER ролью
-     */
     @Test
     @WithMockUser(roles = "USER")
     void testGetTeamWithUserRole() throws Exception {
-        // Arrange
         when(teamService.getTeamByName("backend")).thenReturn(testTeam);
 
-        // Act & Assert
         mockMvc.perform(get("/team/get")
                         .param("team_name", "backend")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -270,17 +235,12 @@ class TeamControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.team_name").value("backend"));
     }
 
-    /**
-     * Тест: ошибка NOT_FOUND при получении несуществующей команды
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetTeamNotFound() throws Exception {
-        // Arrange
         when(teamService.getTeamByName("nonexistent"))
                 .thenThrow(new ApiException(ErrorCode.NOT_FOUND));
 
-        // Act & Assert
         mockMvc.perform(get("/team/get")
                         .param("team_name", "nonexistent")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -289,50 +249,34 @@ class TeamControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error.message").exists());
     }
 
-    /**
-     * Тест: пустой параметр team_name
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetTeamEmptyTeamName() throws Exception {
-        // Act & Assert
         mockMvc.perform(get("/team/get")
                         .param("team_name", "")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
 
-    /**
-     * Тест: отсутствие параметра team_name
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetTeamMissingParameter() throws Exception {
-        // Act & Assert (без параметра team_name)
         mockMvc.perform(get("/team/get")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
-    /**
-     * Тест: отсутствие авторизации для GET
-     */
     @Test
     void testGetTeamUnauthorized() throws Exception {
-        // Act & Assert (без @WithMockUser - нет токена)
         mockMvc.perform(get("/team/get")
                         .param("team_name", "backend")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
-    /**
-     * Тест: GET с неактивными участниками
-     */
     @Test
     @WithMockUser(roles = "ADMIN")
     void testGetTeamWithInactiveMembers() throws Exception {
-        // Arrange
         List<User> mixedMembers = new ArrayList<>();
         mixedMembers.add(User.builder()
                 .userId("u1")
@@ -354,7 +298,6 @@ class TeamControllerTest {
 
         when(teamService.getTeamByName("backend")).thenReturn(teamWithInactive);
 
-        // Act & Assert
         mockMvc.perform(get("/team/get")
                         .param("team_name", "backend")
                         .contentType(MediaType.APPLICATION_JSON))
