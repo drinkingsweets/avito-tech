@@ -56,7 +56,28 @@ public enum ErrorCode {
             "no active replacement candidate in team",
             409,
             ErrorCategory.CONFLICT
-    );
+    ),
+
+    ALREADY_EXISTS(
+            "ALREADY_EXISTS",
+            "Resource already exists",
+            400,
+            ErrorCategory.CONFLICT
+    ),
+
+    INTERNAL_SERVER_ERROR(
+            "INVALID_SERVER_STATE",
+            "Invalid internal server state",
+            500,
+            ErrorCategory.SERVER_ERROR
+    ),
+
+    INVALID_STATE(
+            "INVALID_STATE",
+            "Pull request is not in a valid state for this operation",
+            422,
+            ErrorCategory.CONFLICT
+    ),;
 
     private final String code;
     private final String message;
