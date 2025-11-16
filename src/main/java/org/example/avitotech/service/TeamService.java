@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,7 +36,7 @@ public class TeamService {
         }
 
         if (team.getMembers() == null || team.getMembers().isEmpty()) {
-            throw new ApiException(ErrorCode.NOT_FOUND, "Team must have at least one member");
+            throw new ApiException(ErrorCode.NOT_FOUND, "Team must have at least one member", ErrorCode.ErrorCategory.CONFLICT);
         }
 
         Team savedTeam = teamRepository.save(team);
@@ -58,14 +57,14 @@ public class TeamService {
 
         if (teamName == null || teamName.trim().isEmpty()) {
             log.warn("Team name is empty or null");
-            throw new ApiException(ErrorCode.NOT_FOUND, "Team name cannot be empty");
+            throw new ApiException(ErrorCode.NOT_FOUND, "Team name cannot be empty", ErrorCode.ErrorCategory.CONFLICT);
         }
 
         Team team = teamRepository.findByTeamNameWithMembers(teamName)
                 .orElseThrow(() -> {
                     log.warn("Team not found: {}", teamName);
                     return new ApiException(ErrorCode.NOT_FOUND,
-                            String.format("Team '%s' not found", teamName));
+                            String.format("Team '%s' not found", teamName), ErrorCode.ErrorCategory.CONFLICT);
                 });
 
         log.debug("Team fetched successfully: {} with {} members",
@@ -81,7 +80,7 @@ public class TeamService {
         if (!teamRepository.existsByTeamName(teamName)) {
             log.warn("Team not found: {}", teamName);
             throw new ApiException(ErrorCode.NOT_FOUND,
-                    String.format("Team '%s' not found", teamName));
+                    String.format("Team '%s' not found", teamName), ErrorCode.ErrorCategory.CONFLICT);
         }
 
         List<User> activeMembers = userRepository.findActiveUsersByTeamName(teamName);
@@ -98,7 +97,7 @@ public class TeamService {
         if (!teamRepository.existsByTeamName(teamName)) {
             log.warn("Team not found: {}", teamName);
             throw new ApiException(ErrorCode.NOT_FOUND,
-                    String.format("Team '%s' not found", teamName));
+                    String.format("Team '%s' not found", teamName), ErrorCode.ErrorCategory.CONFLICT);
         }
 
         List<User> members = userRepository.findByTeamName(teamName);
@@ -116,7 +115,7 @@ public class TeamService {
     public int getActiveTeamMembersCount(String teamName) {
         if (!teamRepository.existsByTeamName(teamName)) {
             throw new ApiException(ErrorCode.NOT_FOUND,
-                    String.format("Team '%s' not found", teamName));
+                    String.format("Team '%s' not found", teamName), ErrorCode.ErrorCategory.CONFLICT);
         }
 
         return (int) userRepository.findActiveUsersByTeamName(teamName).size();
@@ -128,7 +127,7 @@ public class TeamService {
 
         if (!teamRepository.existsByTeamName(teamName)) {
             throw new ApiException(ErrorCode.NOT_FOUND,
-                    String.format("Team '%s' not found", teamName));
+                    String.format("Team '%s' not found", teamName), ErrorCode.ErrorCategory.CONFLICT);
         }
 
         List<User> reviewers = userRepository.findReviewersInTeam(teamName);

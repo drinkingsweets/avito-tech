@@ -132,7 +132,7 @@ class UserControllerTests {
                 .isActive(true)
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "User not found"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "User not found", ErrorCode.ErrorCategory.CONFLICT))
                 .when(userService).setUserActive("nonexistent", true);
 
         mockMvc.perform(post("/users/setIsActive")

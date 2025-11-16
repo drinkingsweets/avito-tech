@@ -69,7 +69,7 @@ public class TeamController {
                 log.warn("Team name parameter is empty");
                 throw new ApiException(
                         ErrorCode.NOT_FOUND,
-                        "Team name cannot be empty");
+                        "Team name cannot be empty", ErrorCode.ErrorCategory.CONFLICT);
             }
 
             Team team = teamService.getTeamByName(teamName);

@@ -15,7 +15,7 @@ public class ApiException extends RuntimeException {
         this.customMessage = null;
     }
 
-    public ApiException(ErrorCode errorCode, String customMessage) {
+    public ApiException(ErrorCode errorCode, String customMessage, ErrorCode.ErrorCategory conflict) {
         super(customMessage != null ? customMessage : errorCode.getMessage());
         this.errorCode = errorCode;
         this.customMessage = customMessage;

@@ -31,7 +31,7 @@ public class UserService {
         log.info("Setting user {} active status to {}", userId, isActive);
 
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "User not found"));
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND, "User not found", ErrorCode.ErrorCategory.CONFLICT));
 
         user.setIsActive(isActive);
         userRepository.save(user);

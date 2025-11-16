@@ -101,7 +101,7 @@ class PullRequestControllerTests {
                 .reviewers(List.of("u1", "u2", "u3"))
                 .build();
 
-        doThrow(new ApiException(ErrorCode.ALREADY_EXISTS, "Pull request with ID pr123 already exists"))
+        doThrow(new ApiException(ErrorCode.ALREADY_EXISTS, "Pull request with ID pr123 already exists", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).createPullRequest(
                         "pr123", "Add authentication", "u5", List.of("u1", "u2", "u3"));
 
@@ -124,7 +124,7 @@ class PullRequestControllerTests {
                 .reviewers(List.of("u1", "u2", "u3"))
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Author not found"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Author not found", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).createPullRequest(
                         "pr123", "Add authentication", "nonexistent", List.of("u1", "u2", "u3"));
 
@@ -146,7 +146,7 @@ class PullRequestControllerTests {
                 .reviewers(List.of("u1", "nonexistent"))
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Reviewer not found: nonexistent"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Reviewer not found: nonexistent", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).createPullRequest(
                         "pr123", "Add authentication", "u5", List.of("u1", "nonexistent"));
 
@@ -252,7 +252,7 @@ class PullRequestControllerTests {
                 .prId("nonexistent")
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Pull request not found"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Pull request not found", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).mergePullRequest("nonexistent");
 
         mockMvc.perform(post("/pullRequest/merge")
@@ -270,7 +270,7 @@ class PullRequestControllerTests {
                 .prId("pr123")
                 .build();
 
-        doThrow(new ApiException(ErrorCode.INVALID_STATE, "Pull request is not in OPEN status"))
+        doThrow(new ApiException(ErrorCode.INVALID_STATE, "Pull request is not in OPEN status", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).mergePullRequest("pr123");
 
         mockMvc.perform(post("/pullRequest/merge")
@@ -347,7 +347,7 @@ class PullRequestControllerTests {
                 .newReviewerId("u4")
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Pull request not found"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Pull request not found", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).reassignReviewer("nonexistent", "u1", "u4");
 
         mockMvc.perform(post("/pullRequest/reassign")
@@ -367,7 +367,7 @@ class PullRequestControllerTests {
                 .newReviewerId("u4")
                 .build();
 
-        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Reviewer not assigned to this PR"))
+        doThrow(new ApiException(ErrorCode.NOT_FOUND, "Reviewer not assigned to this PR", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).reassignReviewer("pr123", "nonexistent", "u4");
 
         mockMvc.perform(post("/pullRequest/reassign")
@@ -386,7 +386,7 @@ class PullRequestControllerTests {
                 .newReviewerId("u2")
                 .build();
 
-        doThrow(new ApiException(ErrorCode.ALREADY_EXISTS, "Reviewer already assigned to this PR"))
+        doThrow(new ApiException(ErrorCode.ALREADY_EXISTS, "Reviewer already assigned to this PR", ErrorCode.ErrorCategory.CONFLICT))
                 .when(pullRequestService).reassignReviewer("pr123", "u1", "u2");
 
         mockMvc.perform(post("/pullRequest/reassign")

@@ -2,14 +2,12 @@ package org.example.avitotech.controller;
 
 import org.example.avitotech.dto.PullRequestResponse;
 import org.example.avitotech.dto.UserSetActiveRequest;
-import org.example.avitotech.dto.PullRequestResponse;
 import org.example.avitotech.exception.ApiException;
 import org.example.avitotech.exception.ErrorCode;
 import org.example.avitotech.model.PullRequest;
 import org.example.avitotech.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -40,7 +38,7 @@ public class UserController {
         try {
             if (request.getUserId() == null || request.getUserId().trim().isEmpty()) {
                 log.warn("User ID is empty or null");
-                throw new ApiException(ErrorCode.NOT_FOUND, "User ID cannot be empty");
+                throw new ApiException(ErrorCode.NOT_FOUND, "User ID cannot be empty", ErrorCode.ErrorCategory.CONFLICT);
             }
 
             userService.setUserActive(request.getUserId(), request.getIsActive());
@@ -74,16 +72,16 @@ public class UserController {
                 log.warn("User ID parameter is empty");
                 throw new ApiException(
                         ErrorCode.NOT_FOUND,
-                        "User ID cannot be empty"
-                );
+                        "User ID cannot be empty",
+                        ErrorCode.ErrorCategory.CONFLICT);
             }
 
             if (!userService.userExists(userId)) {
                 log.warn("User not found: {}", userId);
                 throw new ApiException(
                         ErrorCode.NOT_FOUND,
-                        "User not found"
-                );
+                        "User not found",
+                        ErrorCode.ErrorCategory.CONFLICT);
             }
 
             List<PullRequest> pullRequests = userService.getUserPullRequests(userId);
