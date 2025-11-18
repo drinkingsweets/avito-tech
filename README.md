@@ -78,15 +78,7 @@ JWT_SECRET=secret
 JWT_EXPIRATION=86400000
 ```
 
-### 3. Сборка приложения (локально)
-
-```bash
-./gradlew clean build -x test
-```
-
-Это создаст JAR файл в `build/libs/`.
-
-### 4. Запуск через Docker Compose
+### 3. Запуск через Docker Compose
 
 ```bash
 docker-compose up -d
@@ -96,7 +88,7 @@ docker-compose up -d
 
 База данных PostgreSQL на порту `5432`, с предзаполненными двумя пользователями u_admin, u_user, u1, u2 и командой backend чтобы генерировать токен авторизации
 
-### 5. Проверка работоспособности
+### 4. Проверка работоспособности
 
 ```bash
 curl http://localhost:8080/health
@@ -109,13 +101,13 @@ curl http://localhost:8080/health
 }
 ```
 
-### 6. Остановка сервиса
+### 5. Остановка сервиса
 
 ```bash
 docker-compose down
 ```
 
-### 7. Полная очистка (с удалением данных БД)
+### 6. Полная очистка (с удалением данных БД)
 
 ```bash
 docker-compose down -v

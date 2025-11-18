@@ -1,14 +1,24 @@
-# Простой Dockerfile - использует готовый JAR
+FROM amazoncorretto:17 AS builder
+
+WORKDIR /app
+
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY src src
+
+RUN chmod +x gradlew
+
+RUN ./gradlew clean build -x test
 
 FROM amazoncorretto:17
 
-# Установить curl для health checks
 RUN yum install -y curl && yum clean all
 
 WORKDIR /app
 
-# Копируем уже собранный JAR
-COPY build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
 
 EXPOSE 8080
 
